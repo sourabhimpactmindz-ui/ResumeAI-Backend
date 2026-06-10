@@ -86,7 +86,7 @@ export const UserLogin = async(req,res) => {
         res.cookie("refreshToken",refreshToken,{
             httpOnly : true,
             secure:true,
-            sameSite:"lax",
+            sameSite:"none",
             path:"/",
             maxAge: 7 * 24 * 60 * 60 * 1000  
 
@@ -112,7 +112,7 @@ export const refreshToken = async (req, res) => {
     const newAccessToken = jwt.sign(
       { id: decode.id, email: decode.email },
       process.env.SECRET_KEY,
-      { expiresIn: "30d" }
+      { expiresIn: "1m" }
     );
 
     return res
