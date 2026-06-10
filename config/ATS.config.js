@@ -2,6 +2,7 @@ import OpenAI from "openai";
 
 export const analyzeResume = async (extractedText, jobDescription) => {
   try {
+
     if (
       !jobDescription ||
       jobDescription.trim().split(" ").length < 10
@@ -12,143 +13,79 @@ export const analyzeResume = async (extractedText, jobDescription) => {
         strength: [],
         missingSkills: [],
         suggestions: [
-          "Please enter a complete job description.",
-        ],
+          "Please enter a complete job description."
+        ]
       };
     }
 
-    // Limit very large resumes
-    const resumeText = extractedText?.slice(0, 8000) || "";
-
     const client = new OpenAI({
-      baseURL: "https://router.huggingface.co/v1",
+      baseURL: process.env.HUGGING_URI,
       apiKey: process.env.HUGGING_FACE_API_KEY,
       timeout: 60000,
     });
 
-    const prompt = `
-You are an ATS Resume Analyzer.
+    const prompt = `You are an ATS (Applicant Tracking System) Resume Analyzer. Compare the resume with the job description and analyze the match.
 
-Compare the resume with the job description.
+RESUME:
+${extractedText}
 
-Return ONLY valid JSON.
-
-Resume:
-${resumeText}
-
-Job Description:
+JOB DESCRIPTION:
 ${jobDescription}
 
-Required JSON format:
-
+Analyze and return ONLY a valid JSON object with no additional text or markdown:
 {
-  "atsScore": 0,
-  "matchingSkills": [],
-  "strength": [],
-  "missingSkills": [],
-  "suggestions": []
-}
-`;
+  "atsScore": <number between 0-100 representing match percentage>,
+  "matchingSkills": <array of skills from the resume that match the job requirements>,
+  "strength": <array of candidate's key strengths>,
+  "missingSkills": <array of required skills not found in the resume>,
+  "suggestions": <array of specific suggestions to improve the resume for this job>
+}`;
 
-    let response;
+    const response = await client.chat.completions.create({
+      model: "Qwen/Qwen3-32B",
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert ATS Resume Analyzer. Always return valid JSON only. No explanations, no markdown code blocks, just raw JSON.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.3,
+      max_tokens: 800,
+    });
 
-    // Retry up to 3 times
-    for (let i = 0; i < 3; i++) {
-      try {
-        response = await client.chat.completions.create({
-         model: "deepseek-ai/DeepSeek-V3",
-          messages: [
-            {
-              role: "system",
-              content:
-                "You are an ATS Resume Analyzer. Return ONLY valid JSON. No markdown. No explanation. No code blocks.",
-            },
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          temperature: 0.2,
-          max_tokens: 1000,
-        });
-
-        break;
-      } catch (err) {
-        console.error(`Retry ${i + 1} Failed:`, err.message);
-
-        if (i === 2) throw err;
-
-        await new Promise((resolve) =>
-          setTimeout(resolve, 2000)
-        );
-      }
-    }
-
-    const content =
-      response?.choices?.[0]?.message?.content || "";
-
-    console.log("RAW AI RESPONSE:");
-    console.log(content);
+    const content = response.choices[0].message.content;
 
     try {
-      const cleanedContent = content
-        .replace(/<think>[\s\S]*?<\/think>/gi, "")
-        .replace(/```json/gi, "")
-        .replace(/```/g, "")
-        .trim();
+      const cleanedContent = content.trim();
+      const jsonMatch = cleanedContent.match(/\{[\s\S]*\}/);
 
-      const jsonMatch =
-        cleanedContent.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
 
-      const jsonString = jsonMatch
-        ? jsonMatch[0]
-        : cleanedContent;
-
-      const parsed = JSON.parse(jsonString);
-
-      return {
-        atsScore: parsed.atsScore || 0,
-        matchingSkills: parsed.matchingSkills || [],
-        strength: parsed.strength || [],
-        missingSkills: parsed.missingSkills || [],
-        suggestions: parsed.suggestions || [],
-      };
+      return JSON.parse(cleanedContent);
     } catch (parseError) {
-      console.error(
-        "JSON Parse Error:",
-        parseError
-      );
-
-      console.log(
-        "FAILED RESPONSE:",
-        content
-      );
-
+      console.error("JSON Parse Error:", parseError);
       return {
         atsScore: 0,
         matchingSkills: [],
         strength: [],
         missingSkills: [],
-        suggestions: [
-          "AI returned invalid JSON",
-        ],
+        suggestions: ["Unable to parse AI response"],
       };
     }
   } catch (error) {
-    console.error(
-      "Resume Analysis Error:",
-      error
-    );
-
+    console.error("Resume Analysis Error:", error);
     return {
       atsScore: 0,
       matchingSkills: [],
       strength: [],
       missingSkills: [],
-      suggestions: [
-        error?.message ||
-          "Analysis failed",
-      ],
+      suggestions: ["Analysis failed"],
     };
   }
 };
