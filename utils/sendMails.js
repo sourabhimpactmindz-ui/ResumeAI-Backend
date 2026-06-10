@@ -65,10 +65,3 @@ export const sendOtp = async (email, otp) => {
   }
 };
 
-// Fire and forget email - non-blocking version
-export const sendOtpAsync = (email, otp) => {
-  // Don't await - send in background
-  sendOtp(email, otp).catch((error) => {
-    console.error("Background email send failed:", error);
-  });
-};

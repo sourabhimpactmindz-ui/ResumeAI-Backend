@@ -178,7 +178,7 @@ export const ResendOTP = async(req,res) => {
     await user.save()
     
     // Send OTP without blocking the response
-    sendOtpAsync(email, otp);
+    sendOtp(email, otp);
 
   return res.status(200).json({
     message: "OTP Resent Successfully",
