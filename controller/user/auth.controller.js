@@ -1,7 +1,7 @@
 import { User } from "../../model/user.model.js"
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken"
-import { sendOtp, sendOtpAsync } from "../../utils/sendMails.js";
+import { sendOtp } from "../../utils/sendMails.js";
 
 export const UserSign = async(req,res) => {
     const {name , email , password} = req.body
@@ -35,7 +35,7 @@ export const UserSign = async(req,res) => {
         });
         
         // Send OTP without blocking the response
-        sendOtpAsync(email, otp);
+        sendOtp(email, otp);
         
         return res.status(200).json({message : "user created successfully" , status : true})
 
