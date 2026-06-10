@@ -56,7 +56,7 @@ Required JSON format:
     for (let i = 0; i < 3; i++) {
       try {
         response = await client.chat.completions.create({
-          model: "Qwen/Qwen3-32B",
+          model: "meta-llama/Llama-3.3-70B-Instruct",
           messages: [
             {
               role: "system",
