@@ -56,7 +56,7 @@ Required JSON format:
     for (let i = 0; i < 3; i++) {
       try {
         response = await client.chat.completions.create({
-          model: "meta-llama/Llama-3.3-70B-Instruct",
+         model: "deepseek-ai/DeepSeek-V3",
           messages: [
             {
               role: "system",
