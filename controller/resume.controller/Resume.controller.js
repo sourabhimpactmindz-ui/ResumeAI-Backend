@@ -1,4 +1,5 @@
-import Resume from "../../model/Resume.model.js";
+// import Resume from "../../model/Resume.model.js";
+import Resume from "../../model/resume.model.js"
 import pdf from "pdf-parse-fork";
 import axios from 'axios';
 import { analyzeResume } from "../../config/ATS.config.js";
