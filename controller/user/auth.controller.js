@@ -58,7 +58,7 @@ export const UserLogin = async(req,res) => {
         
 
         if(!user){
-            return res.status(400).json({message : "Invalid Credendtials",status:false})
+            return res.status(400).json({message : "User not exits",status:false})
         }
 
         
