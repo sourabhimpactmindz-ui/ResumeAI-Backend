@@ -58,8 +58,10 @@ export const UserLogin = async(req,res) => {
         
 
         if(!user){
-            return res.status(400).json({message : "User not exits",status:false})
-        }
+return res.status(404).json({
+    message: "Account not found. Please sign up first.",
+    status: false
+});        }
 
         
         // if(!user.isVerified){
