@@ -133,33 +133,42 @@ export const refreshToken = async (req, res) => {
 };
 
 
-export const verifyOtp = async(req,res) => {
-    const {email , otp} = req.body;
+export const verifyOtp = async (req, res) => {
+    const { email, otp } = req.body;
 
-    const user = await User.findOne({ email })
+    const user = await User.findOne({ email });
 
-    if(!user){
-        return res.status(404).json({message  : "User not found" , status : false})
+    if (!user) {
+        return res.status(404).json({ message: "User not found", status: false });
     }
 
-    if(user.otp !== otp){
-        return res.status(400).json({message : "Invalid otp",status : false})
+    if (user.otp !== otp) {
+        return res.status(400).json({ message: "Invalid otp", status: false });
     }
 
-    if(user.otpExpire < Date.now()){
-        return res.status(400).json({
-            message : "OTP expired"
-        ,status : false})
+    if (user.otpExpire < Date.now()) {
+        return res.status(400).json({ message: "OTP expired", status: false });
     }
 
-    user.isVerified = true,
-    user.otp = null,
-    user.otpExpire= null
+    user.isVerified = true;
+    user.otp = null;
+    user.otpExpire = null;
 
     await user.save();
 
-    return res.status(200).json({message : "Email verified successfull" , status : true})
-}
+    // ✅ Generate token here
+    const accessToken = jwt.sign(
+        { id: user._id, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: "1d" }
+    );
+
+    return res.status(200).json({
+        message: "Email verified successfully",
+        status: true,
+        accessToken  // ✅ Now this will be received on frontend
+    });
+};
 
 export const ResendOTP = async(req,res) => {
     const { email } = req.body;
