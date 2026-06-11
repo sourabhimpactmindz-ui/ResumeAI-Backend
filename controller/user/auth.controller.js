@@ -156,17 +156,16 @@ export const verifyOtp = async (req, res) => {
 
     await user.save();
 
-    // ✅ Generate token here
     const accessToken = jwt.sign(
         { id: user._id, email: user.email },
-        process.env.JWT_SECRET,
+        process.env.SECRET_KEY,
         { expiresIn: "1d" }
     );
 
     return res.status(200).json({
         message: "Email verified successfully",
         status: true,
-        accessToken  // ✅ Now this will be received on frontend
+        accessToken  
     });
 };
 
