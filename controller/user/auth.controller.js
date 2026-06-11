@@ -64,9 +64,9 @@ return res.status(404).json({
 });        }
 
         
-        // if(!user.isVerified){
-        //     return res.status(400).json({message : "Verify your email first"})
-        // }
+        if(!user.isVerified){
+            return res.status(400).json({message : "Verify your email first"})
+        }
 
         const checkPassword = await bcrypt.compare(password , user.password)
 
