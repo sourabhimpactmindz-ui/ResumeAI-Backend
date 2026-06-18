@@ -124,7 +124,7 @@ export const refreshToken = async (req, res) => {
       .status(200)
       .json({
         message: "New Token created successfully",
-        token: newAccessToken,
+        accessToken: newAccessToken,
         status: true,
       });
   } catch (error) {
