@@ -9,7 +9,8 @@ dotenv.config();
 const app = express();
 app.use(cors({
     origin: "https://resume-ai-frontend-pi.vercel.app",
-    credentials : true
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(cookieParser());
 
