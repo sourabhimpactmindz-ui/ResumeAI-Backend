@@ -88,16 +88,16 @@ return res.status(404).json({
             
         })
 
-        res.cookie("refreshToken",refreshToken,{
-            httpOnly : true,
-            secure:true,
-            sameSite:"none",
-            path:"/",
-            maxAge: 7 * 24 * 60 * 60 * 1000  
+        // res.cookie("refreshToken",refreshToken,{
+        //     httpOnly : true,
+        //     secure:true,
+        //     sameSite:"none",
+        //     path:"/",
+        //     maxAge: 7 * 24 * 60 * 60 * 1000  
 
-        })
+        // })
 
-        return res.status(200).json({message : "user login Successfully",status : true , accessToken : accesstoken})
+        return res.status(200).json({message : "user login Successfully",status : true , accessToken : accesstoken , refreshToken})
 
     }catch(error){
         return res.status(500).json({message : "server error",error:error.message,status:false})
