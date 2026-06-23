@@ -105,30 +105,43 @@ return res.status(404).json({
 }
 
 export const refreshToken = async (req, res) => {
-  const token = req.cookies.refreshToken;
+  const { refreshToken } = req.body;
 
-  if (!token) {
-    return res
-      .status(401)
-      .json({ message: "Token not provided!", status: false });
+  if (!refreshToken) {
+    return res.status(401).json({
+      message: "Token not provided!",
+      status: false
+    });
   }
+
   try {
-    const decode = jwt.verify(token, process.env.REFRESH_KEY);
-    const newAccessToken = jwt.sign(
-      { id: decode.id, email: decode.email },
-      process.env.SECRET_KEY,
-      { expiresIn: "15m" }
+    const decode = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_KEY
     );
 
-    return res
-      .status(200)
-      .json({
-        message: "New Token created successfully",
-        accessToken: newAccessToken,
-        status: true,
-      });
+    const newAccessToken = jwt.sign(
+      {
+        id: decode.id,
+        email: decode.email
+      },
+      process.env.SECRET_KEY,
+      {
+        expiresIn: "15m"
+      }
+    );
+
+    return res.status(200).json({
+      message: "New Token created successfully",
+      accessToken: newAccessToken,
+      status: true
+    });
+
   } catch (error) {
-    return res.status(403).json({ message: "Invalid or expired refresh token", status: false });
+    return res.status(403).json({
+      message: "Invalid or expired refresh token",
+      status: false
+    });
   }
 };
 
