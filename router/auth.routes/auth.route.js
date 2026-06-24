@@ -1,5 +1,5 @@
 import express from 'express';
-import { refreshToken, ResendOTP, UserLogin, UserSign, verifyOtp } from '../../controller/user/auth.controller.js';
+import { GooogleLogin, refreshToken, ResendOTP, UserLogin, UserSign, verifyOtp } from '../../controller/user/auth.controller.js';
 
 
 
@@ -11,5 +11,6 @@ router.post("/login",UserLogin)
 router.post("/refresh",refreshToken)
 router.post("/verify-otp",verifyOtp)
 router.post("/resend-otp",ResendOTP)
+router.post("/google-login",GooogleLogin)
 
 export default router

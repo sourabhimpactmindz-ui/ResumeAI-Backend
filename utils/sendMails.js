@@ -1,8 +1,10 @@
 import { Resend } from "resend";
+import "dotenv/config";
 
 const resend = new Resend(
   process.env.RESEND_API
 );
+
 
 export const sendOtp = async (email, otp) => {
   try {
