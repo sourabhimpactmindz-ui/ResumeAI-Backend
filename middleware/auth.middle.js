@@ -15,7 +15,10 @@ export const userAuth = async(req,res , next)=> {
         req.userid = decode.id;
         next();
     }
-    catch{
-        return res.status(401).json({message: "Token expired or invalid", status:false})
+    catch(err){
+        if(err && err.name === 'TokenExpiredError'){
+            return res.status(401).json({message: "Token expired", status:false})
+        }
+        return res.status(401).json({message: "Invalid token", status:false})
     }
 }
