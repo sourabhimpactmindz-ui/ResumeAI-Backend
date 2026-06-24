@@ -2,6 +2,7 @@ import { User } from "../../model/user.model.js"
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken"
 import { sendOtp } from "../../utils/sendMails.js";
+import admin from "../../config/firebase-admin.js";
 
 export const UserSign = async(req,res) => {
     const {name , email , password} = req.body
