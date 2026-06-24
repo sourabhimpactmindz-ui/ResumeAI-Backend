@@ -5,6 +5,10 @@ const resend = new Resend(
   process.env.RESEND_API
 );
 
+<<<<<<< HEAD
+=======
+console.log(process.env.RESEND_API_KEY);
+>>>>>>> bbc8f01b7fb905dff48fbdc564ae8493b8e6371d
 
 export const sendOtp = async (email, otp) => {
   try {
