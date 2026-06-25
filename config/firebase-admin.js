@@ -1,4 +1,5 @@
 import { initializeApp, cert } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 
 const app = initializeApp({
   credential: cert({
@@ -8,4 +9,4 @@ const app = initializeApp({
   }),
 });
 
-export default app;
+export const auth = getAuth(app);

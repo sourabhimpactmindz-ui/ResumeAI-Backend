@@ -2,7 +2,7 @@ import { User } from "../../model/user.model.js"
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken"
 import { sendOtp } from "../../utils/sendMails.js";
-import admin from "../../config/firebase-admin.js";
+import { auth } from "../../config/firebase-admin.js";
 
 export const UserSign = async(req,res) => {
     const {name , email , password} = req.body
@@ -216,8 +216,7 @@ export const GooogleLogin = async(req,res) => {
 
     try{
 
-        const decode = await admin.auth().verifyIdToken(token);
-
+        const decode = await auth.verifyIdToken(token);
         let user = await User.findOne({email : decode.email})
 
         if(!user){
