@@ -114,7 +114,7 @@ export const refreshToken = async (req, res) => {
   if (!refreshToken) {
     return res.status(401).json({
       message: "Token not provided!",
-      status: false
+      status: false,
     });
   }
 
@@ -127,24 +127,35 @@ export const refreshToken = async (req, res) => {
     const newAccessToken = jwt.sign(
       {
         id: decode.id,
-        email: decode.email
+        email: decode.email,
       },
       process.env.SECRET_KEY,
       {
-        expiresIn: "1m"
+        expiresIn: "15m",
+      }
+    );
+
+    const newRefreshToken = jwt.sign(
+      {
+        id: decode.id,
+        email: decode.email,
+      },
+      process.env.REFRESH_KEY,
+      {
+        expiresIn: "7d",
       }
     );
 
     return res.status(200).json({
-      message: "New Token created successfully",
+      status: true,
       accessToken: newAccessToken,
-      status: true
+      refreshToken: newRefreshToken,
     });
 
   } catch (error) {
     return res.status(403).json({
       message: "Invalid or expired refresh token",
-      status: false
+      status: false,
     });
   }
 };
