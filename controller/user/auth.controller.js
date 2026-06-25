@@ -82,7 +82,7 @@ return res.status(404).json({
         const accesstoken = jwt.sign({
             id : user._id,
             email:user.email
-        },process.env.SECRET_KEY,{expiresIn : "15m"})
+        },process.env.SECRET_KEY,{expiresIn : "1m"})
 
         const refreshToken = jwt.sign({
             id:user._id,
@@ -176,7 +176,7 @@ export const verifyOtp = async (req, res) => {
     const accessToken = jwt.sign(
         { id: user._id, email: user.email },
         process.env.SECRET_KEY,
-        { expiresIn: "1d" }
+        { expiresIn: "1m" }
     );
 
     const refreshToken = jwt.sign({
