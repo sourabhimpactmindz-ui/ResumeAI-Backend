@@ -131,7 +131,7 @@ export const refreshToken = async (req, res) => {
       },
       process.env.SECRET_KEY,
       {
-        expiresIn: "15m",
+        expiresIn: "1m",
       }
     );
 
