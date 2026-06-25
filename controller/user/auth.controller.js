@@ -34,9 +34,12 @@ export const UserSign = async(req,res) => {
             otp,
             otpExpire
         });
+
+        
         
         // Send OTP without blocking the response
         sendOtp(email, otp);
+
         
         return res.status(200).json({message : "user created successfully" , status : true})
 
@@ -176,10 +179,19 @@ export const verifyOtp = async (req, res) => {
         { expiresIn: "1d" }
     );
 
+    const refreshToken = jwt.sign({
+            id:user._id,
+            email:user.email
+        },process.env.REFRESH_KEY,{
+            expiresIn : "7d"
+            
+        })
+
     return res.status(200).json({
         message: "Email verified successfully",
         status: true,
-        accessToken  
+        accessToken,  
+        refreshToken
     });
 };
 
