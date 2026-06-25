@@ -218,7 +218,7 @@ export const GooogleLogin = async(req,res) => {
 
         const decode = await auth.verifyIdToken(token);
         let user = await User.findOne({email : decode.email})
-
+console.log(token);
         if(!user){
             user = await User.create({
                 name : decode.name,
@@ -226,7 +226,7 @@ export const GooogleLogin = async(req,res) => {
                 isVerified : true
             })
         }
-
+console.log("Google Login Hit");
         const accessToken = jwt.sign({
             id: user._id,
             email : user.email,
