@@ -1,25 +1,26 @@
 import OpenAI from "openai";
 
-const EMPTY_RESULT = {
-  atsScore: 0,
-  matchingSkills: [],
-  strength: [],
-  missingSkills: [],
-};
-
 export const analyzeResume = async (extractedText, jobDescription) => {
   try {
-    if (!jobDescription || jobDescription.trim().split(/\s+/).length < 10) {
-      return { ...EMPTY_RESULT, suggestions: ["Please enter a complete job description."] };
-    }
 
-    if (!process.env.OPENAI_API_KEY) {
-      console.error("Missing env: OPENAI_API_KEY");
-      return { ...EMPTY_RESULT, suggestions: ["Server AI config missing"] };
+    if (
+      !jobDescription ||
+      jobDescription.trim().split(" ").length < 10
+    ) {
+      return {
+        atsScore: 0,
+        matchingSkills: [],
+        strength: [],
+        missingSkills: [],
+        suggestions: [
+          "Please enter a complete job description."
+        ]
+      };
     }
 
     const client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY, // baseURL nahi dena
+      baseURL: process.env.HUGGING_URI,
+      apiKey: process.env.HUGGING_FACE_API_KEY,
       timeout: 60000,
     });
 
@@ -31,43 +32,60 @@ ${extractedText}
 JOB DESCRIPTION:
 ${jobDescription}
 
-Return ONLY a valid JSON object:
+Analyze and return ONLY a valid JSON object with no additional text or markdown:
 {
-  "atsScore": <number 0-100>,
-  "matchingSkills": <array of resume skills that match the job>,
+  "atsScore": <number between 0-100 representing match percentage>,
+  "matchingSkills": <array of skills from the resume that match the job requirements>,
   "strength": <array of candidate's key strengths>,
   "missingSkills": <array of required skills not found in the resume>,
   "suggestions": <array of specific suggestions to improve the resume for this job>
 }`;
 
     const response = await client.chat.completions.create({
-      model: "openai/gpt-oss-120b",
+      model: "Qwen/Qwen2.5-72B-Instruct",
       messages: [
-        { role: "system", content: "You are an expert ATS Resume Analyzer. Return valid JSON only." },
-        { role: "user", content: prompt },
+        {
+          role: "system",
+          content: "You are an expert ATS Resume Analyzer. Always return valid JSON only. No explanations, no markdown code blocks, just raw JSON.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
       ],
       temperature: 0.3,
-      max_tokens: 1500,
-      response_format: { type: "json_object" },
+      max_tokens: 800,
     });
 
-    const content = (response.choices?.[0]?.message?.content || "").trim();
+    const content = response.choices[0].message.content;
 
     try {
-      const parsed = JSON.parse(content);
-      return {
-        atsScore: Number(parsed.atsScore) || 0,
-        matchingSkills: parsed.matchingSkills || [],
-        strength: parsed.strength || [],
-        missingSkills: parsed.missingSkills || [],
-        suggestions: parsed.suggestions || [],
-      };
+      const cleanedContent = content.trim();
+      const jsonMatch = cleanedContent.match(/\{[\s\S]*\}/);
+
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+
+      return JSON.parse(cleanedContent);
     } catch (parseError) {
-      console.error("JSON Parse Error:", parseError.message, content.slice(0, 300));
-      return { ...EMPTY_RESULT, suggestions: ["Unable to parse AI response"] };
+      console.error("JSON Parse Error:", parseError);
+      return {
+        atsScore: 0,
+        matchingSkills: [],
+        strength: [],
+        missingSkills: [],
+        suggestions: ["Unable to parse AI response"],
+      };
     }
   } catch (error) {
-    console.error("Resume Analysis Error:", error.status, error.message);
-    return { ...EMPTY_RESULT, suggestions: ["Analysis failed"] };
+    console.error("Resume Analysis Error:", error);
+    return {
+      atsScore: 0,
+      matchingSkills: [],
+      strength: [],
+      missingSkills: [],
+      suggestions: ["Analysis failed"],
+    };
   }
 };
