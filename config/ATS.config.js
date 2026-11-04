@@ -42,7 +42,7 @@ Return ONLY a valid JSON object:
 }`;
 
     const response = await client.chat.completions.create({
-      model: "openai/gpt-oss-120b",
+      model: "Antigravity",
       messages: [
         { role: "system", content: "You are an expert ATS Resume Analyzer. Return valid JSON only, no markdown." },
         { role: "user", content: prompt },
