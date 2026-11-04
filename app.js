@@ -11,7 +11,7 @@ dotenv.config();
 const app = express();
 
 const allowedOrigins = [
-  "https://resume-ai-frontend-lqxz-lvut4546a-sourabhh-projects.vercel.app/",
+  "https://resume-ai-frontend-lqxz.vercel.app",
   "http://localhost:5173"
 ];
 
