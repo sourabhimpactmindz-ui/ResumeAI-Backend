@@ -7,7 +7,6 @@ import resumeRouter from './router/Resume/resume.route.js';
 dotenv.config();
 
 const app = express();
-app.use(cors(corsOptions));
 
 app.use(cors({
    origin: [
