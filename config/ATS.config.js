@@ -42,7 +42,7 @@ Return ONLY a valid JSON object:
 }`;
 
     const response = await client.chat.completions.create({
-      model: "Gemini 3.5 Flash Lite",
+      model: process.env.GEMINI_MODEL || "gemini-3.5-flash-lite",
       messages: [
         { role: "system", content: "You are an expert ATS Resume Analyzer. Return valid JSON only, no markdown." },
         { role: "user", content: prompt },
