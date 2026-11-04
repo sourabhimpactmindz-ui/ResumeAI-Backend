@@ -42,7 +42,7 @@ Analyze and return ONLY a valid JSON object with no additional text or markdown:
 }`;
 
     const response = await client.chat.completions.create({
-      model: "gemma-4-E4B-it",
+      model: "meta-llama/Llama-3.1-8B-Instruct:cheapest",
       messages: [
         {
           role: "system",
