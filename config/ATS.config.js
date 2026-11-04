@@ -42,7 +42,7 @@ Analyze and return ONLY a valid JSON object with no additional text or markdown:
 }`;
 
     const response = await client.chat.completions.create({
-      model: "Qwen/Qwen2.5-72B-Instruct",
+      model: "gemma-4-E4B-it",
       messages: [
         {
           role: "system",
