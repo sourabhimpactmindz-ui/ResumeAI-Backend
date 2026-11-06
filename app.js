@@ -10,6 +10,7 @@ dotenv.config();
 const app = express();
 
 const allowedOrigins = [
+  "https://resume-ai-frontend-lqxz.vercel.app",
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:5175",
@@ -26,8 +27,7 @@ app.use(cors({
       !origin ||
       allowedOrigins.includes(origin) ||
       /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
-      /^https:\/\/resume-ai-frontend(-[a-z0-9-]+)?\.vercel\.app$/.test(origin) ||
-      (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL)
+      /^https:\/\/resume-ai-frontend-lqxz(-[a-z0-9-]+)?\.vercel\.app$/.test(origin)
     ) {
       callback(null, true);
     } else {
