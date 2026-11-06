@@ -234,52 +234,89 @@ export const ResendOTP = async(req,res) => {
 }
 
 
-export const GooogleLogin = async(req,res) => {
-    const {token} = req.body
+export const GooogleLogin = async (req, res) => {
+    const { token } = req.body;
 
-    try{
+    try {
+        if (!token) {
+            return res.status(400).json({
+                status: false,
+                message: "Google ID token is required."
+            });
+        }
+
+        if (!auth) {
+            console.error("Firebase Admin is not configured. Missing or invalid FIREBASE credentials.");
+            return res.status(500).json({
+                status: false,
+                message: "Firebase Admin is not configured on the server. Please verify FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY environment variables."
+            });
+        }
+
+        if (!process.env.SECRET_KEY || !process.env.REFRESH_KEY) {
+            console.error("JWT Secret keys missing. Check SECRET_KEY and REFRESH_KEY environment variables.");
+            return res.status(500).json({
+                status: false,
+                message: "Server configuration error: SECRET_KEY or REFRESH_KEY is missing."
+            });
+        }
 
         const decode = await auth.verifyIdToken(token);
-        let user = await User.findOne({email : decode.email})
-console.log(token);
-        if(!user){
+
+        if (!decode?.email) {
+            return res.status(400).json({
+                status: false,
+                message: "Invalid token: Email address not found in Google account."
+            });
+        }
+
+        let user = await User.findOne({ email: decode.email });
+
+        if (!user) {
             user = await User.create({
-                name : decode.name,
-                email : decode.email,
-                isVerified : true
-            })
+                name: decode.name || decode.email.split("@")[0],
+                email: decode.email,
+                isVerified: true
+            });
+        } else if (!user.isVerified) {
+            user.isVerified = true;
+            await user.save();
         }
-console.log("Google Login Hit");
-        const accessToken = jwt.sign({
-            id: user._id,
-            email : user.email,
 
-        },
-        process.env.SECRET_KEY,
-    {
-        expiresIn : "15m"
+        const accessToken = jwt.sign(
+            {
+                id: user._id,
+                email: user.email,
+            },
+            process.env.SECRET_KEY,
+            {
+                expiresIn: "15m",
+            }
+        );
 
-    },
-        )
-       const refreshToken =
-      jwt.sign(
-        {
-          id: user._id,
-          email: user.email,
-        },
-        process.env.REFRESH_KEY,
-        {
-          expiresIn: "7d",
-        }
-      );
+        const refreshToken = jwt.sign(
+            {
+                id: user._id,
+                email: user.email,
+            },
+            process.env.REFRESH_KEY,
+            {
+                expiresIn: "7d",
+            }
+        );
 
-      return res.status(200).json({message : "user login successfull!",status : true , accessToken , refreshToken})
+        return res.status(200).json({
+            message: "User login successful!",
+            status: true,
+            accessToken,
+            refreshToken
+        });
 
-
-    }catch (error) {
-    return res.status(500).json({
-      status: false,
-      message: error.message,
-    });
-}
-}
+    } catch (error) {
+        console.error("Google Login Error:", error);
+        return res.status(500).json({
+            status: false,
+            message: error.message || "Failed to authenticate with Google",
+        });
+    }
+};
