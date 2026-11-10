@@ -22,19 +22,37 @@ export const UploadResume = async (req, res) => {
             });
         }
 
-        const pdfResponse = await axios.get(req.file.path, {
-            responseType: "arraybuffer"
-        });
+    stage = "PDF_PARSING";
 
-        const pdfData = await pdf(pdfResponse.data);
-        const extractedText = pdfData.text;
+const pdfBuffer = Buffer.from(pdfResponse.data);
 
-        if (!extractedText || extractedText.trim().length === 0) {
-            return res.status(400).json({
-                message: "Could not extract text from PDF",
-                status: false
-            });
-        }
+const loadingTask = pdfjsLib.getDocument({
+    data: new Uint8Array(pdfBuffer),
+    useSystemFonts: true,
+});
+
+const pdfDocument = await loadingTask.promise;
+
+let extractedText = "";
+
+for (let pageNum = 1; pageNum <= pdfDocument.numPages; pageNum++) {
+    const page = await pdfDocument.getPage(pageNum);
+
+    const content = await page.getTextContent();
+
+    extractedText += content.items
+        .map(item => item.str || "")
+        .join(" ") + "\n";
+}
+
+extractedText = extractedText.trim();
+
+if (!extractedText) {
+    return res.status(400).json({
+        message: "Could not extract text from PDF",
+        status: false,
+    });
+}
 
 
 const analysis = await analyzeResume(
