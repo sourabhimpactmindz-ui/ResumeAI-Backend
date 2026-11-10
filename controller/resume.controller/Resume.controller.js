@@ -95,13 +95,15 @@ const analysis = await analyzeResume(
 
     } 
 
-       catch (error) {
 
-  return res.status(500).json({
-    message: "Server error",
-    error: error.message,
-    status: false
-  });
+ catch (error) {
+    console.error("UPLOAD RESUME ERROR:", error);
+    console.error("Error stack:", error.stack);
 
-    }
+    return res.status(500).json({
+        message: "Server error",
+        error: error.message,
+        status: false
+    });
+}
 };
