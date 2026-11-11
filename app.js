@@ -44,4 +44,8 @@ app.use(express.json());
 
 app.use("/api", router, resumeRouter);
 
+app.get("/health",(req,res) => {
+  res.status(200).json({status : "ok" , message : "server is healthy"})
+})
+
 export default app;
