@@ -5,7 +5,7 @@ import cloudinary from './cloudinary.config.js';
 const storage = new CloudinaryStorage({
     cloudinary,
     params: {
-        folder: 'Resume-analyses',
+        folder: 'Resume-analysis',
         resource_type: 'raw',
         allowed_formats: ['pdf'],
     }

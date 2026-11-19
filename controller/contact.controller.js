@@ -29,7 +29,6 @@ export const handleContactMessage = async (req, res) => {
       message: message.trim(),
     });
 
-    // Send email without blocking API response
     sendContactEmail({
       name: newContact.name,
       email: newContact.email,
