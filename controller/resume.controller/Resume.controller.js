@@ -1,6 +1,6 @@
+// import Resume from "../../model/resume.model.js";
 import Resume from "../../model/resume.model.js";
-import { resumeQueue } from "../../queues/resume.queue.js";
-
+import { resumeQueue } from "../../utils/queues/resume.queue.js";
 export const UploadResume = async (req, res) => {
   try {
     const { jobDescription } = req.body;
