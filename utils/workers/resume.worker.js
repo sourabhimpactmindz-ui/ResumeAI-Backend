@@ -3,9 +3,9 @@ import mongoose from "mongoose";
 import axios from "axios";
 import { Worker, UnrecoverableError } from "bullmq";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
-import { connection } from "../config/redis.config.js";
-import Resume from "../model/resume.model.js";
-import { analyzeResume } from "../config/ATS.config.js";
+import { connection } from "../../config/redis.config.js";
+import Resume from "../../model/resume.model.js";
+import { analyzeResume } from "../../config/ATS.config.js";
 
 await mongoose.connect(process.env.MONGO_URI);
 
