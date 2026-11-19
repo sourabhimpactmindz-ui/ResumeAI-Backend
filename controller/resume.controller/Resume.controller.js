@@ -9,7 +9,7 @@ export const UploadResume = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded", status: false });
     }
     if (!jobDescription?.trim()) {
-      return res.status(400).json({ message: "Job description is required", status: false })
+      return res.status(400).json({ message: "Job description is required", status: false });
     }
 
     const resume = await Resume.findOneAndUpdate(
