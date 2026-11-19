@@ -83,6 +83,10 @@ worker.on("failed", async (job, err) => {
 
 worker.on("error", (err) => console.error("Worker error:", err));
 
+worker.on("ready", () => console.log("Worker ready, waiting for jobs"));
+worker.on("active", (job) => console.log(`Job ${job.id} started`));
+worker.on("completed", (job) => console.log(`Job ${job.id} completed`));
+
 process.on("SIGTERM", async () => {
   await worker.close();
   process.exit(0);
