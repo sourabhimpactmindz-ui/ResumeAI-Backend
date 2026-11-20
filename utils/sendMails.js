@@ -21,40 +21,72 @@ export const sendOtp = async (email, otp) => {
     <p>This OTP expires in 5 minutes.</p>
   `;
 
-  // 1. Gmail SMTP
+    console.log("Mail Sent:", data);
+    return true;
+  } catch (error) {
+    console.log("Mail Error:", error);
+    return false;
+  }
+
+
+export const sendContactEmail = async ({ name, email, subject, message }) => {
+  const adminEmail = process.env.EMAIL_USER || "sourabrajput723@gmail.com";
+  const mailSubject = `[ResumeAI Contact] ${subject || "Inquiry from " + name}`;
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; padding: 24px; border: 1.5px solid #000; border-radius: 8px; color: #000;">
+      <h2 style="margin-top: 0; color: #000;">New ResumeAI Contact Message</h2>
+      <p style="color: #555; font-size: 14px;">You have received a new message from the contact form on ResumeAI.</p>
+      <hr style="border: none; border-top: 1px solid #e4e4e4; margin: 18px 0;" />
+      <p style="margin: 8px 0;"><strong>Sender Name:</strong> ${name}</p>
+      <p style="margin: 8px 0;"><strong>Sender Email:</strong> <a href="mailto:${email}" style="color: #000;">${email}</a></p>
+      <p style="margin: 8px 0;"><strong>Subject:</strong> ${subject || "N/A"}</p>
+      <p style="margin: 16px 0 8px;"><strong>Message:</strong></p>
+      <div style="background: #f7f7f7; padding: 14px 18px; border-left: 4px solid #000; border-radius: 4px; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">${message}</div>
+      <hr style="border: none; border-top: 1px solid #e4e4e4; margin: 18px 0;" />
+      <p style="font-size: 12px; color: #888; margin-bottom: 0;">Sent directly from ResumeAI Contact Portal.</p>
+    </div>
+  `;
+
+  // 1. Try Gmail SMTP via Nodemailer
   if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
     try {
-      const info = await getTransporter().sendMail({
-        from: `"ResumeAI" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: "Email Verification OTP",
-        html,
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
       });
-      console.log("OTP sent via Gmail:", info.messageId);
+
+      const info = await transporter.sendMail({
+        from: `"ResumeAI Contact" <${process.env.EMAIL_USER}>`,
+        to: adminEmail,
+        replyTo: email,
+        subject: mailSubject,
+        html: htmlContent,
+      });
+
+      console.log("Contact email sent via Gmail SMTP:", info.messageId);
       return true;
     } catch (err) {
-      console.warn("Gmail failed, trying Resend:", err.message);
+      console.warn("Gmail SMTP delivery failed, trying Resend:", err.message);
     }
   }
 
-  // 2. Resend fallback
+  // 2. Fallback to Resend
   try {
-    const { data, error } = await resend.emails.send({
+    const data = await resend.emails.send({
       from: "onboarding@resend.dev",
-      to: email,
-      subject: "Email Verification OTP",
-      html,
+      to: adminEmail,
+      reply_to: email,
+      subject: mailSubject,
+      html: htmlContent,
     });
 
-    if (error) {
-      console.error("Resend error:", error);
-      return false;
-    }
-
-    console.log("OTP sent via Resend:", data);
+    console.log("Contact email sent via Resend:", data);
     return true;
   } catch (error) {
-    console.error("Resend exception:", error);
+    console.error("Resend delivery failed:", error.message);
     return false;
   }
 };
