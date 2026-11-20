@@ -19,7 +19,7 @@ export const sendOtp = async (email, otp) => {
     <p>Your OTP is:</p>
     <h1>${otp}</h1>
     <p>This OTP expires in 5 minutes.</p>
-  `;
+  `
 
   // 1. Gmail SMTP
   if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
