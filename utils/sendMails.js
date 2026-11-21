@@ -5,25 +5,68 @@ import "dotenv/config";
 const resend = new Resend(process.env.RESEND_API);
 
 export const sendOtp = async (email, otp) => {
-  try {
-    const data = await resend.emails.send({
-      from: "onboarding@resend.dev",
-      to: email,
-      subject: "Email Verification OTP",
-      html: `
-        <h2>Email Verification</h2>
-        <p>Your OTP is:</p>
-        <h1>${otp}</h1>
-        <p>This OTP expires in 5 minutes.</p>
-      `,
-    });
+  const mailSubject = "Email Verification OTP - ResumeAI";
+  const htmlContent = `
+    <div style="font-family: Arial, sans-serif; max-width: 500px; padding: 24px; border: 1px solid #e0e0e0; border-radius: 8px; color: #111;">
+      <h2 style="margin-top: 0; color: #111;">Email Verification</h2>
+      <p style="color: #555; font-size: 15px;">Your one-time verification code is:</p>
+      <div style="background: #f4f4f5; padding: 16px; border-radius: 6px; text-align: center; margin: 20px 0;">
+        <span style="font-size: 32px; font-weight: 700; letter-spacing: 6px; color: #111;">${otp}</span>
+      </div>
+      <p style="color: #777; font-size: 13px;">This OTP will expire in 5 minutes. If you did not request this, please ignore this email.</p>
+    </div>
+  `;
 
-    console.log("Mail Sent:", data);
-    return true;
-  } catch (error) {
-    console.log("Mail Error:", error);
-    return false;
+  // 1. Try Gmail SMTP via Nodemailer first if configured
+  if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    try {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      const info = await transporter.sendMail({
+        from: `"ResumeAI" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: mailSubject,
+        html: htmlContent,
+      });
+
+      console.log("OTP sent via Gmail SMTP to", email, ":", info.messageId);
+      return true;
+    } catch (err) {
+      console.warn("Gmail SMTP OTP delivery failed, trying Resend:", err.message);
+    }
   }
+
+  // 2. Fallback to Resend
+  if (process.env.RESEND_API) {
+    try {
+      const { data, error } = await resend.emails.send({
+        from: "onboarding@resend.dev",
+        to: email,
+        subject: mailSubject,
+        html: htmlContent,
+      });
+
+      if (error) {
+        console.error("Resend OTP error:", error);
+        return false;
+      }
+
+      console.log("OTP sent via Resend to", email, ":", data);
+      return true;
+    } catch (error) {
+      console.error("Resend OTP exception:", error.message);
+      return false;
+    }
+  }
+
+  console.error("No email transport configured (missing EMAIL_USER/EMAIL_PASS and RESEND_API).");
+  return false;
 };
 
 export const sendContactEmail = async ({ name, email, subject, message }) => {

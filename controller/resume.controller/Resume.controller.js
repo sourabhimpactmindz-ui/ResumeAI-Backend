@@ -1,4 +1,3 @@
-// import Resume from "../../model/resume.model.js";
 import Resume from "../../model/resume.model.js";
 import { resumeQueue } from "../../utils/queues/resume.queue.js";
 export const UploadResume = async (req, res) => {
@@ -44,8 +43,8 @@ export const UploadResume = async (req, res) => {
   }
 };
 
-export const  GetResumeStatus = async (req, res) => {
-    res.set("Cache-Control", "no-store");
+export const GetResumeStatus = async (req, res) => {
+  res.set("Cache-Control", "no-store");
   try {
     const resume = await Resume.findOne({ _id: req.params.id, userId: req.userid });
     if (!resume) {
